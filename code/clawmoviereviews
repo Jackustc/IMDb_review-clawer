@@ -1,0 +1,73 @@
+# coding: utf-8
+import requests
+from bs4 import BeautifulSoup   
+import re
+
+def claw(url):
+    i = 0
+    i = i + 1
+    #url = 'http://www.imdb.com/title/tt0974015/reviews?ref_=tt_ov_rt'
+    headers = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'}
+    url_htm = requests.get(url, headers = headers)
+    soup = BeautifulSoup(url_htm.text)
+    for line in soup.findAll('div',{'class:','title'}):#review_title        
+        review_title.append(line.string)
+    for line in soup.findAll('span',{'class:','display-name-link'}): # reviewer_name/profile_url
+        reviewer_name.append(line.string)
+        url = BeautifulSoup(str(line)).find('a').get('href')
+        #print(url)
+        reviewer_pro_url.append('http://www.imdb.com'+url)
+    for line in soup.findAll('span',{'class:','review-date'}): # review data
+        release_time.append(line.string)
+    for line in soup.findAll('div',{'class:','actions text-muted'}): # helpfulness
+        helpfulness.append(str(line).split('\n')[1].strip())
+    for line in soup.findAll('div',{'class:','text'}): # review content
+        spl = 'class="text">'
+        review_con = str(line).split(spl)[1].split('</div')[0].strip()
+        review_con = re.sub(r'</?\w+[^>]*>' ,'', review_con) # clean review content
+        review_content.append(review_con)
+    for line in soup.findAll('span',{'class:','rating-other-user-rating'}): # star_rating
+        soup1 = BeautifulSoup(str(line))
+        line1=soup1.select('span > span')
+        star_rating.append(line1[0].string)
+       
+if __name__ == '__main__':
+    review_title = ['review_title']
+    star_rating = ['star_rating']
+    review_content = ['review_content']
+    helpfulness = ['helpfulness']
+    reviewer_name = ['reviewer_name']
+    reviewer_pro_url = ['reviewer_pro_url']
+    release_time = ['release_time']
+    url = ['http://www.imdb.com/title/tt0974015/reviews?ref_=tt_ov_rt',
+           'http://www.imdb.com/title/tt0974015/reviews/_ajax?ref_=undefined&paginationKey=ilyed6ql5tcs3lsoapdvyiiczrnksva3w3k26r5mrdr73hscew6byaby5ppwtflpswteqqqwo3l5o',
+           'http://www.imdb.com/title/tt0974015/reviews/_ajax?ref_=undefined&paginationKey=qzrwu72onqtk67xn7ce3nioghiw6nuhpn4odmlszugj5agr2s3jmkosup3yryqssdh2bf4ncpcure',
+           'http://www.imdb.com/title/tt0974015/reviews/_ajax?ref_=undefined&paginationKey=h2bmfxevzm3zocmftp33uqhqu7mxst6s2hrizpc4cytzncxnjc4x5s4qgln65xlujgh6qn2of3iky',
+           #'http://www.imdb.com/title/tt0974015/reviews/_ajax?ref_=undefined&paginationKey=cde7aotgo7g35kwah4xxjg7uljabxxpq4j65asjh75l4nqw32vra45mzospts66r47zmqwgqpgcb4',
+           'http://www.imdb.com/title/tt0974015/reviews/_ajax?ref_=undefined&paginationKey=jburfkgba3cscuvf7ae2vxprx7rra4plxgtrhctdexjiujusit4mcslg6lamd23xavek7zekbfnss',
+           'http://www.imdb.com/title/tt0974015/reviews/_ajax?ref_=undefined&paginationKey=ojthaskvaopgfstdvsemzkql2ofz6oao327b6osrq4r2ih54cqxtnvsv4ea5vftpq2p4ilguw6yem',
+           'http://www.imdb.com/title/tt0974015/reviews/_ajax?ref_=undefined&paginationKey=oqekyksk2kiyvsudzptw3e2i4ssnzmo3tm5xrcgwtjntasmosxmbb2d7sxol3muud6esypzenmuna',
+           'http://www.imdb.com/title/tt0974015/reviews/_ajax?ref_=undefined&paginationKey=a2ppdhcosa7fg2zn2xrznuqqsbddyxtx2ax44vkhiqokvlzw2bno2x7jjtirhkvaahfnwn7hpyzoc',
+           'http://www.imdb.com/title/tt0974015/reviews/_ajax?ref_=undefined&paginationKey=ohmdaf5zso3lj7xwecu7lvu3aswlp3hqersvrh4tmi734blakkg4k6vetw6hjkvlyzxss2r7aw76u',
+           'http://www.imdb.com/title/tt0974015/reviews/_ajax?ref_=undefined&paginationKey=6j6b435rjymxrdjkldqpg72obxofxpp7cxvucy5bfrnape63iedimdxct36sxvow5aqpxegegyk5y',
+           'http://www.imdb.com/title/tt0974015/reviews/_ajax?ref_=undefined&paginationKey=6zpkdqxtw2enf4okzagruoyk37o3nrzrhf2jz7xqwgtcqyvahcv2zaa7kdwjwnvhiqlihmkqdahky',
+           'http://www.imdb.com/title/tt0974015/reviews/_ajax?ref_=undefined&paginationKey=vqp5uej3zfpzukuxfwg26fv7fz7svd7yvcoeijv5ox6z6zoe5gq37fupzl6swjpko6zcpehnhhpmo',
+           'http://www.imdb.com/title/tt0974015/reviews/_ajax?ref_=undefined&paginationKey=vvoib2mq7ypq3qrxcvpc5ua2hzxgr6pfi6i3ffuexpqcpgqp7bjivirgyx5y6fapcwwz3n252knbu']
+    for i in range(len(url)):  claw(url[i])
+    '''
+    print(len(review_title))
+    print(star_rating)
+    print(review_content)
+    print(helpfulness)
+    print(reviewer_name)
+    print(reviewer_pro_url)
+    print(release_time)
+    '''
+    with open('review.txt','w',encoding='utf-8') as f: 
+        for i in range(len(review_title)): 
+            f.write(reviewer_name[i].center(20)+'\t\t\t'+review_title[i].center(80)+'\t\t\t'+star_rating[i]+'\t\t\t' \
+                    +helpfulness[i].center(30)+'\t\t\t'+release_time[i].center(20)+'\t\t\t'+reviewer_pro_url[i].center(30)+'\n')
+    with open('reviewconext.txt','w',encoding='utf-8') as f: 
+        for i in range(len(review_content)):
+            f.write(review_content[i]+'\n')
+            
